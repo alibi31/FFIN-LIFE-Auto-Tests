@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "boolean"
+    },
+    "message": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "policy_number": {
+          "type": "string"
+        },
+        "start_date": {
+          "type": "string"
+        },
+        "start_age": {
+          "type": "integer"
+        },
+        "documents": {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "type": "string"
+            },
+            "statement": {
+              "type": "string"
+            },
+            "frhc_consent": {
+              "type": "string"
+            },
+            "data_processing_agreement": {
+              "type": "string"
+            },
+            "app_deduction": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "app_deduction",
+            "contract",
+            "data_processing_agreement",
+            "frhc_consent",
+            "statement"
+          ]
+        }
+      },
+      "required": [
+        "documents",
+        "policy_number",
+        "start_age",
+        "start_date"
+      ]
+    }
+  },
+  "required": [
+    "data",
+    "message",
+    "status"
+  ]
+}

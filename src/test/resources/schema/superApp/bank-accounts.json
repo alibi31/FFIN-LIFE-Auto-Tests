@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "boolean"
+    },
+    "message": {
+      "type": "string"
+    },
+    "data": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "cardNumber": {
+              "type": "string"
+            },
+            "iban": {
+              "type": "string"
+            },
+            "embossedName": {
+              "type": "string"
+            },
+            "expireDate": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "cardNumber",
+            "iban",
+            "embossedName",
+            "expireDate"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "status",
+    "message",
+    "data"
+  ]
+}
+

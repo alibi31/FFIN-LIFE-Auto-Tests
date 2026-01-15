@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "fullname_ru": {
+          "type": "string"
+        },
+        "fullname_kz": {
+          "type": "string"
+        },
+        "fullname_en": {
+          "type": "string"
+        },
+        "position_ru": {
+          "type": "string"
+        },
+        "position_kz": {
+          "type": "string"
+        },
+        "position_en": {
+          "type": "string"
+        },
+        "description_ru": {
+          "type": "string"
+        },
+        "description_kz": {
+          "type": "string"
+        },
+        "description_en": {
+          "type": "string"
+        },
+        "image": {
+          "type": "null"
+        },
+        "our_team_group_id": {
+          "type": "integer"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "fullname_ru",
+        "fullname_kz",
+        "fullname_en",
+        "position_ru",
+        "position_kz",
+        "position_en",
+        "description_ru",
+        "description_kz",
+        "description_en",
+        "image",
+        "our_team_group_id",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

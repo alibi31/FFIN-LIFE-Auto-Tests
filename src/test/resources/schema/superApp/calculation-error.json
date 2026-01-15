@@ -1,0 +1,1 @@
+{"$schema": "http://json-schema.org/schema#", "type": "object", "properties": {"status": {"type": "boolean"}, "message": {"type": "string"}, "data": {"type": "null"}}, "required": ["data", "message", "status"]}
