@@ -36,6 +36,9 @@ public interface EnvironmentConfiguration extends Config {
     @Key("cabinet.url")
     String cabinetUrl();
 
+    @Key("api.cabinet.url")
+    String apiCabinetUrl();
+
     @Key("api.superApp.url")
     String apiSuperAppUrl();
 
