@@ -70,7 +70,7 @@ public class HealthRegistrationTest {
                 .promo("")
                 .build();
 
-        ValidatableResponse response = apiClient.post(
+        ValidatableResponse response = apiClient.postWithAuth(
                 apiCabinetUrl,
                 "api/v2/products/freedom-health/register",
                 request
