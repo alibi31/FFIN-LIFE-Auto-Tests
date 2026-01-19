@@ -43,8 +43,8 @@ public class ApiClient {
 
         // Получаем новый токен
         String newToken = fetchFreshToken(uin, password);
-        // Токен действителен 10 минут (600 секунд)
-        Instant expiresAt = Instant.now().plusSeconds(600);
+        // Токен действителен 1 час (3600 секунд)
+        Instant expiresAt = Instant.now().plusSeconds(3600);
 
         cachedToken.set(new TokenData(newToken, expiresAt));
         return newToken;
@@ -81,7 +81,7 @@ public class ApiClient {
         return current != null && !current.isExpired();
     }
 
-    // Новый метод с автоматической авторизацией
+    // Метод с автоматической авторизацией
     public ValidatableResponse postWithAuth(String baseUri, String uriPath, Object body) {
         String token = getAuthToken();
 
