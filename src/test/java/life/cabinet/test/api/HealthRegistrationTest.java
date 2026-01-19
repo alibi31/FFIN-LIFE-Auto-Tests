@@ -81,7 +81,7 @@ public class HealthRegistrationTest {
                 .contentType(JSON)
                 .body("status", is(true))
                 .extract()
-                .path("policy_number")
+                .path("data")
                 .toString().replace("OK:", "").trim();
 
         PoliciesRegistry.register(policyNumber);
