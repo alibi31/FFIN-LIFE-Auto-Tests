@@ -56,14 +56,14 @@ public class EducationRegistrationTest {
                 .build();
 
         EducationRegistrationRequest.Options options = EducationRegistrationRequest.Options.builder()
-                .deathDueToAccident(true)
-                .disabilityDueToAccident(true)
-                .bodilyInjury(true)
-                .criticalIllness(true)
-                .temporaryIncapacityForWork(true)
-                .hospitalizationAsResultOfAccident(true)
-                .childBodilyInjury(true)
-                .childCriticalIllness(true)
+                .deathDueToAccident(false)
+                .disabilityDueToAccident(false)
+                .bodilyInjury(false)
+                .criticalIllness(false)
+                .temporaryIncapacityForWork(false)
+                .hospitalizationAsResultOfAccident(false)
+                .childBodilyInjury(false)
+                .childCriticalIllness(false)
                 .build();
 
         EducationRegistrationRequest request = EducationRegistrationRequest.builder()
@@ -92,7 +92,7 @@ public class EducationRegistrationTest {
 
         // Задержка в 10 секунд, чтобы аннулировать договор корректно.
         try {
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(60);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Задержка была прервана", e);

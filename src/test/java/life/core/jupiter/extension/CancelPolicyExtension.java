@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import life.superapp.api.model.cancel.CancelPolicyResponse;
 
 
 import java.io.IOException;
@@ -20,6 +21,27 @@ public class CancelPolicyExtension implements AfterEachCallback {
 
     private final CancelPolicyService cancelPolicyService = new CancelPolicyApiService();
 
+
+//    @Override
+//    public void afterEach(ExtensionContext context) throws Exception {
+//        AnnotationSupport.findAnnotation(context.getRequiredTestMethod(), CancelPolicy.class)
+//                .ifPresent(ann -> {
+//                    List<String> policies = PoliciesRegistry.drain();
+//
+//                    if (policies.isEmpty()) {
+//                        return;
+//                    }
+//
+//                    for (String policy : policies) {
+//                        try {
+//                            log.info("Cancelling policy [{}] after test [{}]", policy, context.getDisplayName());
+//                            cancelPolicyService.cancelPolicy(policy, "test");
+//                        } catch (IOException e) {
+//                            log.error("Failed to cancel policy [{}] after test [{}]", policy, context.getDisplayName(), e);
+//                        }
+//                    }
+//                });
+//    }
 
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
@@ -33,10 +55,20 @@ public class CancelPolicyExtension implements AfterEachCallback {
 
                     for (String policy : policies) {
                         try {
-                            log.info("Cancelling policy [{}] after test [{}]", policy, context.getDisplayName());
-                            cancelPolicyService.cancelPolicy(policy, "test");
+                            // Теперь получаем Response
+                            CancelPolicyResponse response = cancelPolicyService.cancelPolicy(policy, "test");
+
+                            if (response.isSuccess()) {
+                                log.info("Successfully cancelled policy [{}] after test [{}]",
+                                        policy, context.getDisplayName());
+                            } else {
+                                log.error("Failed to cancel policy [{}]. Reason: {}",
+                                        policy, response.getMessage());
+                            }
+
                         } catch (IOException e) {
-                            log.error("Failed to cancel policy [{}] after test [{}]", policy, context.getDisplayName(), e);
+                            log.error("Failed to cancel policy [{}] after test [{}]",
+                                    policy, context.getDisplayName(), e);
                         }
                     }
                 });
