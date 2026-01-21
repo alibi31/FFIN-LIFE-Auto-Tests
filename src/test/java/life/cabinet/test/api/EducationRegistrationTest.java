@@ -26,13 +26,21 @@ public class EducationRegistrationTest {
     @CancelPolicy
     @DisplayName("POST /api/v2/products/freedom-education/register")
     void shouldBeStatus200FromEducationRegistrationTest(){
-        EducationRegistrationRequest.Document document = EducationRegistrationRequest.Document.builder()
+        // Данные документов родителя
+        EducationRegistrationRequest.Document parentDocument = EducationRegistrationRequest.Document.builder()
                 .number("042101243")
                 .type(13310363)
                 .authority("МВД РК")
                 .date("2017-09-15")
                 .build();
-
+        // Данные документов ребёнка
+        EducationRegistrationRequest.Document childDocument = EducationRegistrationRequest.Document.builder()
+                .number("042101243")
+                .type(13310363)
+                .authority("МВД РК")
+                .date("2017-09-15")
+                .build();
+        // Данные родителя
         EducationRegistrationRequest.Parent parent = EducationRegistrationRequest.Parent.builder()
                 .uin("010131500057")
                 .fullName("Қуандық Әліби Ерболұлы")
@@ -41,9 +49,9 @@ public class EducationRegistrationTest {
                 .phone("+7 (747) 304-51-32")
                 .email("alibi6390@gmail.com")
                 .address("Улица Абиш Кекилбайулы 264")
-                .doc(document)
+                .doc(parentDocument)
                 .build();
-
+        // Данные ребёнка
         EducationRegistrationRequest.Child child = EducationRegistrationRequest.Child.builder()
                 .uin("150513501862")
                 .fullName("John Doe")
@@ -52,9 +60,9 @@ public class EducationRegistrationTest {
                 .phone("+7 (777) 777-77-77")
                 .email("test@test.com")
                 .address("Улица Гагарина 117")
-                .doc(document)
+                .doc(childDocument)
                 .build();
-
+        // Дополнительные опции страхования
         EducationRegistrationRequest.Options options = EducationRegistrationRequest.Options.builder()
                 .deathDueToAccident(false)
                 .disabilityDueToAccident(false)
@@ -65,23 +73,23 @@ public class EducationRegistrationTest {
                 .childBodilyInjury(false)
                 .childCriticalIllness(false)
                 .build();
-
+        // Передаем все нужные данные для отправки запроса
         EducationRegistrationRequest request = EducationRegistrationRequest.builder()
                 .period(4)
                 .term(3)
                 .premium(15000)
-                .notification_method(2)
+                .notificationMethod(2)
                 .parent(parent)
                 .child(child)
                 .options(options)
                 .build();
-
+        // Получаем токен авторизации и отправляем запрос на нужный эндпоинт
         ValidatableResponse response = apiClient.postWithAuth(
                 apiCabinetUrl,
                 "api/v2/products/freedom-education/register",
                 request
         );
-
+        // Получем ответ после отправки запроса
         String policyNumber = response
                 .statusCode(200)
                 .contentType(JSON)
@@ -90,14 +98,14 @@ public class EducationRegistrationTest {
                 .path("data")
                 .toString().replace("OK:", "").trim();
 
-        // Задержка в 10 секунд, чтобы аннулировать договор корректно.
+        // Задержка в 70 секунд, чтобы аннулировать договор корректно
         try {
-            TimeUnit.SECONDS.sleep(60);
+            TimeUnit.SECONDS.sleep(70);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Задержка была прервана", e);
         }
-
+        // Передаем номер полиса, чтобы аннулировать его
         PoliciesRegistry.register(policyNumber);
     }
 }

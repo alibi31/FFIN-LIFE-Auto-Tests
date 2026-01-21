@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
+// Все данные которые передаются в теле запроса
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-
 public record EducationRegistrationRequest(
         @JsonProperty("period") Integer period,
         @JsonProperty("term") Integer term,
         @JsonProperty("premium") Integer premium,
-        @JsonProperty("notification_method") Integer notification_method,
+        @JsonProperty("notification_method") Integer notificationMethod,
         @JsonProperty("parent") Parent parent,
         @JsonProperty("child") Child child,
         @JsonProperty("options") Options options

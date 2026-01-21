@@ -25,8 +25,8 @@ public class HealthRegistrationTest {
     @CancelPolicy
     @DisplayName("POST /api/v2/products/freedom-health/register")
     void shouldBeStatus200FromHealthRegistrationTest() {
-
-        HealthRegistrationRequest.Document document = HealthRegistrationRequest.Document.builder()
+        // Данные документов страхователя
+        HealthRegistrationRequest.Document insurerDocument = HealthRegistrationRequest.Document.builder()
                 .number("042101243")
                 .type(13310363)
                 .authority("МВД РК")
@@ -34,7 +34,16 @@ public class HealthRegistrationTest {
                 .isDisabled(true)
                 .date("2017-09-15")
                 .build();
-
+        // Данные документов застрахованного
+        HealthRegistrationRequest.Document insuredDocument = HealthRegistrationRequest.Document.builder()
+                .number("042101243")
+                .type(13310363)
+                .authority("МВД РК")
+                .active(true)
+                .isDisabled(true)
+                .date("2017-09-15")
+                .build();
+        // Данные страхователя
         HealthRegistrationRequest.Insurer insurer = HealthRegistrationRequest.Insurer.builder()
                 .fullName("Қуандық Әліби Ерболұлы")
                 .uin("010131500057")
@@ -43,9 +52,9 @@ public class HealthRegistrationTest {
                 .birthDate("2001-01-31")
                 .address("Алматы, Улица Абиш Кекилбайулы, 264")
                 .email("alibi6390@gmail.com")
-                .doc(document)
+                .doc(insurerDocument)
                 .build();
-
+        // Данные застрахованного
         HealthRegistrationRequest.Insured insured = HealthRegistrationRequest.Insured.builder()
                 .fullName("Қуандық Әліби Ерболұлы")
                 .uin("010131500057")
@@ -54,9 +63,9 @@ public class HealthRegistrationTest {
                 .birthDate("2001-01-31")
                 .address("Алматы, Улица Абиш Кекилбайулы, 264")
                 .email("alibi6390@gmail.com")
-                .doc(document)
+                .doc(insuredDocument)
                 .build();
-
+        // Передаем все нужные данные для отправки запроса
         HealthRegistrationRequest request = HealthRegistrationRequest.builder()
                 .program(5)
                 .period(1463)
@@ -69,13 +78,13 @@ public class HealthRegistrationTest {
                 .nomad("")
                 .promo("")
                 .build();
-
+        // Получаем токен авторизации и отправляем запрос на нужный эндпоинт
         ValidatableResponse response = apiClient.postWithAuth(
                 apiCabinetUrl,
                 "api/v2/products/freedom-health/register",
                 request
         );
-
+        // Получем ответ после отправки запроса
         String policyNumber = response
                 .statusCode(200)
                 .contentType(JSON)
@@ -83,7 +92,7 @@ public class HealthRegistrationTest {
                 .extract()
                 .path("data")
                 .toString().replace("OK:", "").trim();
-
+        // Передаем номер полиса, чтобы аннулировать его
         PoliciesRegistry.register(policyNumber);
     }
 

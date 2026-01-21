@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
+// Все данные которые передаются в теле запроса
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public record HealthRegistrationRequest(
