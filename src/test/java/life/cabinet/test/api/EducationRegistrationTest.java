@@ -89,7 +89,7 @@ public class EducationRegistrationTest {
                 "api/v2/products/freedom-education/register",
                 request
         );
-        // Получем ответ после отправки запроса
+        // Получем ответ после отправки запроса, проверяем ответ на корректность
         String policyNumber = response
                 .statusCode(200)
                 .contentType(JSON)
