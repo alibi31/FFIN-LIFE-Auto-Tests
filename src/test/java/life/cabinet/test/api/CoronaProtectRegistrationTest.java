@@ -1,27 +1,27 @@
 package life.cabinet.test.api;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.qameta.allure.Owner;
 import io.restassured.response.ValidatableResponse;
 import life.cabinet.api.model.coronaprotect.CoronaProtectRegistrationRequest;
 import life.core.http.ApiClient;
-import life.core.jupiter.annotation.CancelPolicy;
-import life.utils.PoliciesRegistry;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static io.restassured.http.ContentType.JSON;
 
 import static org.hamcrest.Matchers.*;
 
+@Tag("cabinet-api")
+@Owner("QA")
 public class CoronaProtectRegistrationTest {
     private final ApiClient apiClient = new ApiClient();
     private final String apiCabinetUrl = EnvConfig.cfg().apiCabinetUrl();
 
     @Test
-    @CancelPolicy
     @DisplayName("POST /api/v2/products/corona-protect/register")
     void shouldBeStatus200FromCoronaProtectRegistrationTest(){
         // Данные документов страхователя
@@ -54,7 +54,7 @@ public class CoronaProtectRegistrationTest {
                 .startDate("2017-09-15")
                 .endDate("")
                 .build();
-        // Данные родителя
+        // Данные страхователя
         CoronaProtectRegistrationRequest.Insurer insurer = CoronaProtectRegistrationRequest.Insurer.builder()
                 .uin("010131500057")
                 .fullName("Қуандық Әліби Ерболұлы")
@@ -65,20 +65,20 @@ public class CoronaProtectRegistrationTest {
                 .address("Улица Абиш Кекилбайулы 264")
                 .doc(insurerDocument)
                 .build();
-        // Данные ребёнка
+        // Данные застрахованного
         CoronaProtectRegistrationRequest.Insured insured = CoronaProtectRegistrationRequest.Insured.builder()
-                .uin("150513501862")
-                .fullName("John Doe")
+                .uin("010131500057")
+                .fullName("Қуандық Әліби Ерболұлы")
                 .gender(1)
-                .birthDate("2015-05-13")
-                .phone("+7 (777) 777-77-77")
-                .email("test@test.com")
-                .address("Улица Гагарина 117")
+                .birthDate("2001-01-31")
+                .phone("+7 (747) 304-51-32")
+                .email("alibi6390@gmail.com")
+                .address("Улица Абиш Кекилбайулы 264")
                 .doc(insuredDocument)
                 .build();
-        // Данные ребёнка
+        // Данные выгодоприобретателя
         CoronaProtectRegistrationRequest.Recipient recipient = CoronaProtectRegistrationRequest.Recipient.builder()
-                .uin("150513501862")
+                .uin("040308500629")
                 .fullName("John Doe")
                 .gender(1)
                 .birthDate("2015-05-13")
@@ -117,7 +117,6 @@ public class CoronaProtectRegistrationTest {
                 .extract()
                 .path("data")
                 .toString().replace("OK:", "").trim();
-        // Передаем номер полиса, чтобы аннулировать его
-        PoliciesRegistry.register(policyNumber);
+        ContractCleanupTest.collectPolicyNumbers(List.of(policyNumber));
     }
 }

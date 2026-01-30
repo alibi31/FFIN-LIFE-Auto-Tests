@@ -48,12 +48,16 @@ dependencies {
     testImplementation("com.squareup.retrofit2:retrofit:2.11.0")
     testImplementation("com.squareup.retrofit2:converter-jackson:2.11.0")
     testImplementation("com.squareup.retrofit2:converter-scalars:2.11.0")
+    testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.2")
     testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
     testImplementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     testImplementation("com.squareup.okhttp3:okhttp-urlconnection:4.11.0")
     testImplementation("org.springframework.data:spring-data-commons:3.3.3")
 
     testImplementation("io.qameta.allure:allure-okhttp3:2.29.1")
+
+    testImplementation("org.junit.platform:junit-platform-suite-api:1.10.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
 }
 
 allure {
@@ -77,6 +81,8 @@ allure {
 
 tasks.test {
     useJUnitPlatform {
+        includeEngines("junit-jupiter", "junit-platform-suite")
+
         // ./gradlew test -PincludeTags=ffin-api,PA-UI
         if (project.hasProperty("includeTags")) {
             val include = project.property("includeTags")

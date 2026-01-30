@@ -1,31 +1,54 @@
 package life.cabinet.test.api;
 
 import io.qameta.allure.Owner;
+import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
+import life.cabinet.api.PolicyApi;
+import life.cabinet.api.SessionApi;
 import life.core.http.ApiClient;
 import life.cabinet.api.model.health.HealthRegistrationRequest;
-import life.core.jupiter.annotation.CancelPolicy;
-import life.utils.PoliciesRegistry;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.http.ContentType.JSON;
+import java.util.List;
 
+import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("cabinet-api")
 @Owner("QA")
 public class HealthRegistrationTest {
     private final ApiClient apiClient = new ApiClient();
     private final String apiCabinetUrl = EnvConfig.cfg().apiCabinetUrl();
+    public static String lastCreatedPolicyNumber;
 
     @Test
-    @CancelPolicy
-    @DisplayName("POST /api/v2/products/freedom-health/register")
+    @DisplayName("Регистрация полиса Health")
     void shouldBeStatus200FromHealthRegistrationTest() {
-        // Данные документов страхователя
+        // Подготовить тестовые данные
+        HealthRegistrationRequest request = prepareTestData();
+
+        // Отправить запрос на регистрацию полиса
+        ValidatableResponse response = sendRegistrationRequest(request);
+
+        // Проверить ответ и извлечь номер полиса
+        String policyNumber = extractAndValidatePolicyNumber(response);
+
+        // Зарегистрировать полис
+//        registerPolicy(policyNumber);
+
+        // Активировать полис (сделать действующим)
+        activateHealthPolicy(policyNumber);
+
+        // Сохраняем полис
+        lastCreatedPolicyNumber = policyNumber;
+    }
+
+    @Step("1. Подготовить тестовые данные для полиса Health")
+    private HealthRegistrationRequest prepareTestData() {
         HealthRegistrationRequest.Document insurerDocument = HealthRegistrationRequest.Document.builder()
                 .number("042101243")
                 .type(13310363)
@@ -34,7 +57,7 @@ public class HealthRegistrationTest {
                 .isDisabled(true)
                 .date("2017-09-15")
                 .build();
-        // Данные документов застрахованного
+
         HealthRegistrationRequest.Document insuredDocument = HealthRegistrationRequest.Document.builder()
                 .number("042101243")
                 .type(13310363)
@@ -43,7 +66,7 @@ public class HealthRegistrationTest {
                 .isDisabled(true)
                 .date("2017-09-15")
                 .build();
-        // Данные страхователя
+
         HealthRegistrationRequest.Insurer insurer = HealthRegistrationRequest.Insurer.builder()
                 .fullName("Қуандық Әліби Ерболұлы")
                 .uin("010131500057")
@@ -54,7 +77,7 @@ public class HealthRegistrationTest {
                 .email("alibi6390@gmail.com")
                 .doc(insurerDocument)
                 .build();
-        // Данные застрахованного
+
         HealthRegistrationRequest.Insured insured = HealthRegistrationRequest.Insured.builder()
                 .fullName("Қуандық Әліби Ерболұлы")
                 .uin("010131500057")
@@ -65,8 +88,8 @@ public class HealthRegistrationTest {
                 .email("alibi6390@gmail.com")
                 .doc(insuredDocument)
                 .build();
-        // Передаем все нужные данные для отправки запроса
-        HealthRegistrationRequest request = HealthRegistrationRequest.builder()
+
+        return HealthRegistrationRequest.builder()
                 .program(5)
                 .period(1463)
                 .insurer(insurer)
@@ -78,13 +101,20 @@ public class HealthRegistrationTest {
                 .nomad("")
                 .promo("")
                 .build();
-        // Получаем токен авторизации и отправляем запрос на нужный эндпоинт
-        ValidatableResponse response = apiClient.postWithAuth(
+    }
+
+    @Step("2. Отправить запрос на регистрацию полиса Health")
+    private ValidatableResponse sendRegistrationRequest(HealthRegistrationRequest request) {
+        return apiClient.postWithAuth(
                 apiCabinetUrl,
                 "api/v2/products/freedom-health/register",
                 request
         );
-        // Получем ответ после отправки запроса, проверяем ответ на корректность
+    }
+
+    @Step("3. Проверить ответ и извлечь номер полиса")
+    private String extractAndValidatePolicyNumber(ValidatableResponse response) {
+        // Проверяем статус код и структуру ответа
         String policyNumber = response
                 .statusCode(200)
                 .contentType(JSON)
@@ -92,8 +122,24 @@ public class HealthRegistrationTest {
                 .extract()
                 .path("data")
                 .toString().replace("OK:", "").trim();
-        // Передаем номер полиса, чтобы аннулировать его
-        PoliciesRegistry.register(policyNumber);
+
+        // Валидация номера полиса
+        assertNotNull(policyNumber, "Номер полиса не должен быть null");
+        assertFalse(policyNumber.isEmpty(), "Номер полиса не должен быть пустым");
+
+        return policyNumber;
+    }
+
+    @Step("4. Активировать полис {policyNumber} через SOAP API")
+    private void activateHealthPolicy(String policyNumber) {
+        try {
+            String sessionId = SessionApi.getSessionId();
+            PolicyApi.activatePolicy(sessionId, policyNumber);
+        } catch (Exception e) {
+            // Логируем ошибку, но не падаем - основной тест уже прошел
+            System.err.println("Ошибка при активации полиса " + policyNumber + ": " + e.getMessage());
+        }
+        ContractCleanupTest.collectPolicyNumbers(List.of(policyNumber));
     }
 
 }

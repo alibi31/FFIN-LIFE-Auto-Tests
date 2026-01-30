@@ -1,5 +1,6 @@
 package life.core.http;
 
+import io.qameta.allure.Step;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
@@ -7,6 +8,7 @@ import life.cabinet.api.model.auth.CabinetAuthorizationRequest;
 import life.utils.config.EnvConfig;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.RestAssured.given;
@@ -33,6 +35,7 @@ public class ApiClient {
         return getAuthToken("010131500057", "alibi2001");
     }
 
+    @Step("Получить Bearer токен для пользователя {uin}")
     public synchronized String getAuthToken(String uin, String password) {
         TokenData current = cachedToken.get();
 
@@ -79,6 +82,27 @@ public class ApiClient {
     public boolean isTokenValid() {
         TokenData current = cachedToken.get();
         return current != null && !current.isExpired();
+    }
+
+    @Step("Отправить GET запрос с авторизацией")
+    public ValidatableResponse getWithAuth(String baseUri, String uriPath) {
+        String token = getAuthToken();
+        Header authHeader = new Header("Authorization", "Bearer " + token);
+        return get(baseUri, uriPath, authHeader);
+    }
+
+    @Step("Отправить GET запрос с авторизацией и параметрами")
+    public ValidatableResponse getWithAuth(String baseUri, String uriPath, Map<String, String> params) {
+        String token = getAuthToken();
+        Header authHeader = new Header("Authorization", "Bearer " + token);
+
+        return given()
+                .spec(RequestSpec.json(baseUri))
+                .header(authHeader)
+                .params(params)
+                .when()
+                .get(uriPath)
+                .then();
     }
 
     // Метод с автоматической авторизацией

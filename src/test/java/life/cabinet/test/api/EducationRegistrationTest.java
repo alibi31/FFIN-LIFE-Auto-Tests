@@ -1,29 +1,27 @@
 package life.cabinet.test.api;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.qameta.allure.Owner;
 import io.restassured.response.ValidatableResponse;
 import life.cabinet.api.model.education.EducationRegistrationRequest;
 import life.core.http.ApiClient;
-import life.core.jupiter.annotation.CancelPolicy;
-import life.utils.PoliciesRegistry;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import static io.restassured.http.ContentType.JSON;
 
 import static org.hamcrest.Matchers.*;
 
+@Tag("cabinet-api")
+@Owner("QA")
 public class EducationRegistrationTest {
     private final ApiClient apiClient = new ApiClient();
     private final String apiCabinetUrl = EnvConfig.cfg().apiCabinetUrl();
 
     @Test
-    @CancelPolicy
     @DisplayName("POST /api/v2/products/freedom-education/register")
     void shouldBeStatus200FromEducationRegistrationTest(){
         // Данные документов родителя
@@ -97,15 +95,6 @@ public class EducationRegistrationTest {
                 .extract()
                 .path("data")
                 .toString().replace("OK:", "").trim();
-
-        // Задержка в 70 секунд, чтобы аннулировать договор корректно
-        try {
-            TimeUnit.SECONDS.sleep(70);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Задержка была прервана", e);
-        }
-        // Передаем номер полиса, чтобы аннулировать его
-        PoliciesRegistry.register(policyNumber);
+        ContractCleanupTest.collectPolicyNumbers(List.of(policyNumber));
     }
 }
