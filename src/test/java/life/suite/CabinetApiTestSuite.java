@@ -22,8 +22,7 @@ import java.util.concurrent.TimeUnit;
         HealthRegistrationTest.class,
         FirstRegistrationTest.class,
         CoronaProtectRegistrationTest.class,
-        ContractsFilterTest.class,
-        ContractCleanupTest.class
+        ContractsFilterTest.class
 })
 public class CabinetApiTestSuite {
 

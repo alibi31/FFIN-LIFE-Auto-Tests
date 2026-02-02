@@ -7,6 +7,7 @@ import life.cabinet.api.PolicyApi;
 import life.cabinet.api.SessionApi;
 import life.core.http.ApiClient;
 import life.cabinet.api.model.health.HealthRegistrationRequest;
+import life.core.jupiter.annotation.CancelPolicy;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -23,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HealthRegistrationTest {
     private final ApiClient apiClient = new ApiClient();
     private final String apiCabinetUrl = EnvConfig.cfg().apiCabinetUrl();
-    public static String lastCreatedPolicyNumber;
 
     @Test
     @DisplayName("Регистрация полиса Health")
@@ -43,8 +43,6 @@ public class HealthRegistrationTest {
         // Активировать полис (сделать действующим)
         activateHealthPolicy(policyNumber);
 
-        // Сохраняем полис
-        lastCreatedPolicyNumber = policyNumber;
     }
 
     @Step("1. Подготовить тестовые данные для полиса Health")
@@ -90,7 +88,7 @@ public class HealthRegistrationTest {
                 .build();
 
         return HealthRegistrationRequest.builder()
-                .program(5)
+                .program(7)
                 .period(1463)
                 .insurer(insurer)
                 .insured(insured)
@@ -139,7 +137,6 @@ public class HealthRegistrationTest {
             // Логируем ошибку, но не падаем - основной тест уже прошел
             System.err.println("Ошибка при активации полиса " + policyNumber + ": " + e.getMessage());
         }
-        ContractCleanupTest.collectPolicyNumbers(List.of(policyNumber));
     }
 
 }

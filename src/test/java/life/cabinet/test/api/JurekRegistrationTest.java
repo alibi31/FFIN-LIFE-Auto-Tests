@@ -4,6 +4,7 @@ import io.qameta.allure.Owner;
 import io.restassured.response.ValidatableResponse;
 import life.cabinet.api.model.jurek.JurekRegistrationRequest;
 import life.core.http.ApiClient;
+import life.core.jupiter.annotation.CancelPolicy;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -107,6 +108,5 @@ public class JurekRegistrationTest {
                 .extract()
                 .path("data")
                 .toString().replace("OK:", "").trim();
-        ContractCleanupTest.collectPolicyNumbers(List.of(policyNumber));
     }
 }
