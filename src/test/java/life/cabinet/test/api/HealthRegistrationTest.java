@@ -7,13 +7,11 @@ import life.cabinet.api.PolicyApi;
 import life.cabinet.api.SessionApi;
 import life.core.http.ApiClient;
 import life.cabinet.api.model.health.HealthRegistrationRequest;
-import life.core.jupiter.annotation.CancelPolicy;
+import life.utils.PoliciesRegistry;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.*;
@@ -36,9 +34,6 @@ public class HealthRegistrationTest {
 
         // Проверить ответ и извлечь номер полиса
         String policyNumber = extractAndValidatePolicyNumber(response);
-
-        // Зарегистрировать полис
-//        registerPolicy(policyNumber);
 
         // Активировать полис (сделать действующим)
         activateHealthPolicy(policyNumber);
@@ -124,7 +119,8 @@ public class HealthRegistrationTest {
         // Валидация номера полиса
         assertNotNull(policyNumber, "Номер полиса не должен быть null");
         assertFalse(policyNumber.isEmpty(), "Номер полиса не должен быть пустым");
-
+        PoliciesRegistry.register(policyNumber);
+        PoliciesRegistry.debug();
         return policyNumber;
     }
 
@@ -138,5 +134,6 @@ public class HealthRegistrationTest {
             System.err.println("Ошибка при активации полиса " + policyNumber + ": " + e.getMessage());
         }
     }
+
 
 }

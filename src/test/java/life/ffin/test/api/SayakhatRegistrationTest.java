@@ -87,7 +87,5 @@ public class SayakhatRegistrationTest {
 
         PoliciesRegistry.register(policyNumber);
 
-
-
     }
 }

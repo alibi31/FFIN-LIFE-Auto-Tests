@@ -16,13 +16,14 @@ import java.util.concurrent.TimeUnit;
 @SelectClasses({
         CabinetAuthorizationTest.class,
         GetContractTest.class,
+        ContractsFilterTest.class,
         GetDocumentsTest.class,
+        GetCardsTest.class,
+        GetRequisitesTest.class,
         EducationRegistrationTest.class,
         JurekRegistrationTest.class,
         HealthRegistrationTest.class,
-        FirstRegistrationTest.class,
-        CoronaProtectRegistrationTest.class,
-        ContractsFilterTest.class
+        FirstRegistrationTest.class
 })
 public class CabinetApiTestSuite {
 

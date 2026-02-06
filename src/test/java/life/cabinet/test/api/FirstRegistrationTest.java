@@ -5,6 +5,7 @@ import io.restassured.response.ValidatableResponse;
 import life.cabinet.api.model.first.FirstRegistrationRequest;
 import life.core.http.ApiClient;
 import life.core.jupiter.annotation.CancelPolicy;
+import life.utils.PoliciesRegistry;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -88,5 +89,7 @@ public class FirstRegistrationTest {
                 .extract()
                 .path("data")
                 .toString().replace("OK:", "").trim();
+        PoliciesRegistry.register(policyNumber);
+        PoliciesRegistry.debug();
     }
 }

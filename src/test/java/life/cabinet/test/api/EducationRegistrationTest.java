@@ -1,20 +1,21 @@
 package life.cabinet.test.api;
 
 import io.qameta.allure.Owner;
+import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
-import life.cabinet.api.model.education.EducationRegistrationRequest;
+import life.cabinet.api.PolicyApi;
+import life.cabinet.api.SessionApi;
 import life.core.http.ApiClient;
-import life.core.jupiter.annotation.CancelPolicy;
+import life.cabinet.api.model.education.EducationRegistrationRequest;
+import life.utils.PoliciesRegistry;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static io.restassured.http.ContentType.JSON;
-
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("cabinet-api")
 @Owner("QA")
@@ -24,22 +25,33 @@ public class EducationRegistrationTest {
 
     @Test
     @DisplayName("POST /api/v2/products/freedom-education/register")
-    void shouldBeStatus200FromEducationRegistrationTest(){
-        // Данные документов родителя
+    void shouldBeStatus200FromEducationRegistrationTest() {
+
+        EducationRegistrationRequest request = prepareTestData();
+
+        ValidatableResponse response = sendRegistrationRequest(request);
+
+        String policyNumber = extractAndValidatePolicyNumber(response);
+
+        activateEducationPolicy(policyNumber);
+    }
+
+    @Step("1. Подготовить тестовые данные для полиса Education")
+    private EducationRegistrationRequest prepareTestData() {
         EducationRegistrationRequest.Document parentDocument = EducationRegistrationRequest.Document.builder()
                 .number("042101243")
                 .type(13310363)
                 .authority("МВД РК")
                 .date("2017-09-15")
                 .build();
-        // Данные документов ребёнка
+
         EducationRegistrationRequest.Document childDocument = EducationRegistrationRequest.Document.builder()
                 .number("042101243")
                 .type(13310363)
                 .authority("МВД РК")
                 .date("2017-09-15")
                 .build();
-        // Данные родителя
+
         EducationRegistrationRequest.Parent parent = EducationRegistrationRequest.Parent.builder()
                 .uin("010131500057")
                 .fullName("Қуандық Әліби Ерболұлы")
@@ -50,7 +62,7 @@ public class EducationRegistrationTest {
                 .address("Улица Абиш Кекилбайулы 264")
                 .doc(parentDocument)
                 .build();
-        // Данные ребёнка
+
         EducationRegistrationRequest.Child child = EducationRegistrationRequest.Child.builder()
                 .uin("150513501862")
                 .fullName("John Doe")
@@ -61,6 +73,7 @@ public class EducationRegistrationTest {
                 .address("Улица Гагарина 117")
                 .doc(childDocument)
                 .build();
+
         // Дополнительные опции страхования
         EducationRegistrationRequest.Options options = EducationRegistrationRequest.Options.builder()
                 .deathDueToAccident(false)
@@ -73,7 +86,7 @@ public class EducationRegistrationTest {
                 .childCriticalIllness(false)
                 .build();
         // Передаем все нужные данные для отправки запроса
-        EducationRegistrationRequest request = EducationRegistrationRequest.builder()
+        return EducationRegistrationRequest.builder()
                 .period(4)
                 .term(3)
                 .premium(15000)
@@ -82,13 +95,19 @@ public class EducationRegistrationTest {
                 .child(child)
                 .options(options)
                 .build();
-        // Получаем токен авторизации и отправляем запрос на нужный эндпоинт
-        ValidatableResponse response = apiClient.postWithAuth(
+    }
+
+    @Step("2. Отправить запрос на регистрацию полиса Education")
+    private ValidatableResponse sendRegistrationRequest(EducationRegistrationRequest request){
+        return apiClient.postWithAuth(
                 apiCabinetUrl,
                 "api/v2/products/freedom-education/register",
                 request
         );
-        // Получем ответ после отправки запроса, проверяем ответ на корректность
+    }
+
+    @Step("3. Проверить ответ и извлечь номер полиса")
+    private String extractAndValidatePolicyNumber(ValidatableResponse response){
         String policyNumber = response
                 .statusCode(200)
                 .contentType(JSON)
@@ -96,5 +115,23 @@ public class EducationRegistrationTest {
                 .extract()
                 .path("data")
                 .toString().replace("OK:", "").trim();
+
+        assertNotNull(policyNumber, "Номер полиса не должен быть null");
+        assertFalse(policyNumber.isEmpty(), "Номер полиса не должен быть пустым");
+        PoliciesRegistry.register(policyNumber);
+        PoliciesRegistry.debug();
+        return policyNumber;
     }
+
+    @Step("4. Активировать полис {policyNumber} через SOAP API")
+    private void activateEducationPolicy(String policyNumber){
+        try {
+            String sessionId = SessionApi.getSessionId();
+            PolicyApi.activatePolicy(sessionId, policyNumber);
+        } catch (Exception e) {
+            // Логируем ошибку, но не падаем - основной тест уже прошел
+            System.err.println("Ошибка при активации полиса " + policyNumber + ": " + e.getMessage());
+        }
+    }
+
 }

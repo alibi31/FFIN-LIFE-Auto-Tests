@@ -4,13 +4,11 @@ import io.qameta.allure.Owner;
 import io.restassured.response.ValidatableResponse;
 import life.cabinet.api.model.jurek.JurekRegistrationRequest;
 import life.core.http.ApiClient;
-import life.core.jupiter.annotation.CancelPolicy;
+import life.utils.PoliciesRegistry;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static io.restassured.http.ContentType.JSON;
 
@@ -106,7 +104,10 @@ public class JurekRegistrationTest {
                 .contentType(JSON)
                 .body("status", is(true))
                 .extract()
-                .path("data")
+                .path("data.policy_number")
                 .toString().replace("OK:", "").trim();
+        PoliciesRegistry.register(policyNumber);
+        PoliciesRegistry.debug();
+
     }
 }

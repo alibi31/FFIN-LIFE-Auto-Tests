@@ -58,6 +58,14 @@ dependencies {
 
     testImplementation("org.junit.platform:junit-platform-suite-api:1.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
+
+    testImplementation("org.junit.platform:junit-platform-launcher:1.10.1")
+
+    // Logging dependencies
+    testImplementation("org.slf4j:slf4j-api:2.0.13")
+    testImplementation("ch.qos.logback:logback-classic:1.5.6")
+    // Для отображения логов в консоли Gradle
+    testImplementation("org.slf4j:slf4j-simple:2.0.13")
 }
 
 allure {
