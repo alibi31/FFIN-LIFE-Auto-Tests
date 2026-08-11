@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import java.util.concurrent.TimeUnit;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 
 public class CancelPolicyApiService implements CancelPolicyService {
@@ -106,24 +105,6 @@ public class CancelPolicyApiService implements CancelPolicyService {
         throw lastException != null ? lastException :
                 new IOException("Failed after " + MAX_RETRIES + " attempts");
     }
-
-//    @Override
-//    public void cancelPolicy(String policyNumber, String reason) throws IOException {
-//        String soapEnvelope = buildSoapEnvelope(policyNumber, reason);
-//        RequestBody body = RequestBody.create(soapEnvelope, SOAP_MEDIA_TYPE);
-//
-//        Request request = new Request.Builder()
-//                .url(cancelPolicyUrl)
-//                .post(body)
-//                .addHeader("Content-Type", "text/xml")
-//                .build();
-//
-//        try (Response response = client.newCall(request).execute()) {
-//            if (!response.isSuccessful()) {
-//                throw new IOException("Failed to cancel policy. HTTP status: " + response.code());
-//            }
-//        }
-//    }
 
     private String buildSoapEnvelope(String policyNumber, String reason) {
         return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +

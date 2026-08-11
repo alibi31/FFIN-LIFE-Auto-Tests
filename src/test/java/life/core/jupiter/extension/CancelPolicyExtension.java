@@ -21,28 +21,6 @@ public class CancelPolicyExtension implements AfterEachCallback {
 
     private final CancelPolicyService cancelPolicyService = new CancelPolicyApiService();
 
-
-//    @Override
-//    public void afterEach(ExtensionContext context) throws Exception {
-//        AnnotationSupport.findAnnotation(context.getRequiredTestMethod(), CancelPolicy.class)
-//                .ifPresent(ann -> {
-//                    List<String> policies = PoliciesRegistry.drain();
-//
-//                    if (policies.isEmpty()) {
-//                        return;
-//                    }
-//
-//                    for (String policy : policies) {
-//                        try {
-//                            log.info("Cancelling policy [{}] after test [{}]", policy, context.getDisplayName());
-//                            cancelPolicyService.cancelPolicy(policy, "test");
-//                        } catch (IOException e) {
-//                            log.error("Failed to cancel policy [{}] after test [{}]", policy, context.getDisplayName(), e);
-//                        }
-//                    }
-//                });
-//    }
-
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
         AnnotationSupport.findAnnotation(context.getRequiredTestMethod(), CancelPolicy.class)

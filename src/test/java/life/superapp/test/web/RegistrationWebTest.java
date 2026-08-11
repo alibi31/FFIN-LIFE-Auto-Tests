@@ -3,7 +3,6 @@ package life.superapp.test.web;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Route;
 import life.core.jupiter.annotation.WebTest;
-import life.core.web.BrowserFactory;
 import life.core.web.Pages;
 import life.core.web.UiSession;
 import life.superapp.jupiter.annotation.AccessToken;

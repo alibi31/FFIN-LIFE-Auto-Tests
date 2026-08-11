@@ -2,9 +2,7 @@ package life.cabinet.api.model.jurek;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.qameta.allure.Owner;
 import lombok.Builder;
-import org.junit.jupiter.api.Tag;
 
 // Все данные которые передаются в теле запроса
 @JsonInclude(JsonInclude.Include.NON_NULL)
