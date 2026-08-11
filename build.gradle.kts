@@ -37,6 +37,7 @@ dependencies {
 
     testImplementation("org.projectlombok:lombok:1.18.42")
 
+    testImplementation("io.qameta.allure:allure-junit5:2.29.1")
     testImplementation("io.qameta.allure:allure-rest-assured:2.29.1")
 
     testImplementation("com.microsoft.playwright:playwright:1.50.0")
@@ -66,6 +67,13 @@ dependencies {
     testImplementation("ch.qos.logback:logback-classic:1.5.6")
     // Для отображения логов в консоли Gradle
     testImplementation("org.slf4j:slf4j-simple:2.0.13")
+
+    // Wiremock и Test containers
+    testImplementation("org.wiremock:wiremock-standalone:3.0.1")
+    testImplementation("org.testcontainers:testcontainers:1.19.0")
+    testImplementation("org.testcontainers:postgresql:1.19.0")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.0")
+    testImplementation("org.awaitility:awaitility:4.2.0")
 }
 
 allure {

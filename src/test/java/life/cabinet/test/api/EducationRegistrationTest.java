@@ -13,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -120,6 +122,14 @@ public class EducationRegistrationTest {
         assertFalse(policyNumber.isEmpty(), "Номер полиса не должен быть пустым");
         PoliciesRegistry.register(policyNumber);
         PoliciesRegistry.debug();
+
+        try {
+            TimeUnit.SECONDS.sleep(90);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Задержка была прервана", e);
+        }
+
         return policyNumber;
     }
 
