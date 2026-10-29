@@ -8,6 +8,7 @@ import life.cabinet.api.SessionApi;
 import life.core.http.ApiClient;
 import life.cabinet.api.model.education.EducationRegistrationRequest;
 import life.utils.PoliciesRegistry;
+import life.utils.PolicyActivationWaiter;
 import life.utils.config.EnvConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -134,12 +135,20 @@ public class EducationRegistrationTest {
     }
 
     @Step("4. Активировать полис {policyNumber} через SOAP API")
-    private void activateEducationPolicy(String policyNumber){
+//    private void activateEducationPolicy(String policyNumber){
+//        try {
+//            String sessionId = SessionApi.getSessionId();
+//            PolicyApi.activatePolicy(sessionId, policyNumber);
+//        } catch (Exception e) {
+//            // Логируем ошибку, но не падаем - основной тест уже прошел
+//            System.err.println("Ошибка при активации полиса " + policyNumber + ": " + e.getMessage());
+//        }
+//    }
+
+    private void activateEducationPolicy(String policyNumber) {
         try {
-            String sessionId = SessionApi.getSessionId();
-            PolicyApi.activatePolicy(sessionId, policyNumber);
+            PolicyActivationWaiter.activateWhenReady(policyNumber);
         } catch (Exception e) {
-            // Логируем ошибку, но не падаем - основной тест уже прошел
             System.err.println("Ошибка при активации полиса " + policyNumber + ": " + e.getMessage());
         }
     }
