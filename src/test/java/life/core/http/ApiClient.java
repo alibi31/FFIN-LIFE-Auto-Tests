@@ -1,56 +1,54 @@
 package life.core.http;
 
+import io.qameta.allure.Param;
 import io.qameta.allure.Step;
+import io.qameta.allure.model.Parameter;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import life.cabinet.api.model.auth.CabinetAuthorizationRequest;
 import life.utils.config.EnvConfig;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.restassured.RestAssured.given;
 
 public class ApiClient {
-    private static final AtomicReference<TokenData> cachedToken = new AtomicReference<>();
 
-    private static class TokenData {
-        final String token;
-        final Instant expiresAt;
+    /** Время жизни токена на стенде — 1 час; обновляем с запасом, чтобы не получить 401 на границе */
+    private static final Duration TOKEN_TTL = Duration.ofHours(1);
+    private static final Duration SAFETY_MARGIN = Duration.ofMinutes(2);
 
-        TokenData(String token, Instant expiresAt) {
-            this.token = token;
-            this.expiresAt = expiresAt;
-        }
+    /** Кэш токенов по пользователю (uin). Общий для всех экземпляров ApiClient и всех потоков. */
+    private static final Map<String, TokenData> TOKENS = new ConcurrentHashMap<>();
 
+    private record TokenData(String token, Instant expiresAt) {
         boolean isExpired() {
             return Instant.now().isAfter(expiresAt);
         }
     }
 
-    // Получение токена с кэшированием
-    public synchronized String getAuthToken() {
-        return getAuthToken("010131500057", "alibi2001");
+    // ---------- Авторизация ----------
+
+    /** Токен пользователя по умолчанию (учётка берётся из конфигурации, не из кода) */
+    public String getAuthToken() {
+        return getAuthToken(defaultUin(), defaultPassword());
     }
 
     @Step("Получить Bearer токен для пользователя {uin}")
-    public synchronized String getAuthToken(String uin, String password) {
-        TokenData current = cachedToken.get();
-
-        // Если токен есть и не истек - возвращаем
-        if (current != null && !current.isExpired()) {
-            return current.token;
-        }
-
-        // Получаем новый токен
-        String newToken = fetchFreshToken(uin, password);
-        // Токен действителен 1 час (3600 секунд)
-        Instant expiresAt = Instant.now().plusSeconds(3600);
-
-        cachedToken.set(new TokenData(newToken, expiresAt));
-        return newToken;
+    public String getAuthToken(String uin,
+                               @Param(name = "password", mode = Parameter.Mode.MASKED) String password) {
+        // compute блокирует только этот uin: за токеном одного пользователя идёт ровно один поток,
+        // остальные ждут и получают уже закэшированный токен
+        return TOKENS.compute(uin, (key, current) ->
+                current != null && !current.isExpired()
+                        ? current
+                        : new TokenData(fetchFreshToken(uin, password),
+                        Instant.now().plus(TOKEN_TTL).minus(SAFETY_MARGIN))
+        ).token();
     }
 
     private String fetchFreshToken(String uin, String password) {
@@ -69,86 +67,75 @@ public class ApiClient {
                 .extract()
                 .response();
 
-        return response.jsonPath().getString("token");
+        String body = response.asString();
+        String token = (body == null || body.isBlank()) ? null : response.jsonPath().getString("token");
+        if (token == null || token.isBlank()) {
+            throw new IllegalStateException(
+                    "Логин пользователя " + uin + " вернул 200, но без токена. Тело ответа: '" + body + "'");
+        }
+        return token;
     }
 
-    // Метод для принудительного обновления токена
+    /** Сбросить токен пользователя по умолчанию и получить новый */
     public void refreshToken() {
-        cachedToken.set(null);
-        getAuthToken();
+        refreshToken(defaultUin(), defaultPassword());
     }
 
-    // Метод для проверки валидности токена
+    public void refreshToken(String uin, String password) {
+        TOKENS.remove(uin);
+        getAuthToken(uin, password);
+    }
+
     public boolean isTokenValid() {
-        TokenData current = cachedToken.get();
+        TokenData current = TOKENS.get(defaultUin());
         return current != null && !current.isExpired();
     }
 
+    private static String defaultUin() {
+        return EnvConfig.cfg().cabinetUin();
+    }
+
+    private static String defaultPassword() {
+        return EnvConfig.cfg().cabinetPassword();
+    }
+
+    private Header bearer() {
+        return new Header("Authorization", "Bearer " + getAuthToken());
+    }
+
+    // ---------- Запросы с авторизацией ----------
+
     @Step("Отправить GET запрос с авторизацией")
     public ValidatableResponse getWithAuth(String baseUri, String uriPath) {
-        String token = getAuthToken();
-        Header authHeader = new Header("Authorization", "Bearer " + token);
-        return get(baseUri, uriPath, authHeader);
+        return get(baseUri, uriPath, bearer());
     }
 
     @Step("Отправить GET запрос с авторизацией и параметрами")
     public ValidatableResponse getWithAuth(String baseUri, String uriPath, Map<String, String> params) {
-        String token = getAuthToken();
-        Header authHeader = new Header("Authorization", "Bearer " + token);
-
         return given()
                 .spec(RequestSpec.json(baseUri))
-                .header(authHeader)
+                .header(bearer())
                 .params(params)
                 .when()
                 .get(uriPath)
                 .then();
     }
 
-    // Метод с автоматической авторизацией
     public ValidatableResponse postWithAuth(String baseUri, String uriPath, Object body) {
-        String token = getAuthToken();
-
-        return given()
-                .spec(RequestSpec.json(baseUri))
-                .header("Authorization", "Bearer " + token)
-                .body(body)
-                .when()
-                .post(uriPath)
-                .then();
+        return post(baseUri, uriPath, body, bearer());
     }
 
-    // Метод с автоматическим обновлением токена при 401
+    /** POST с одной повторной попыткой при 401 (токен протух на стороне сервера) */
     public ValidatableResponse postWithAutoRefresh(String baseUri, String uriPath, Object body) {
-        String token = getAuthToken();
-
-        ValidatableResponse response = given()
-                .spec(RequestSpec.json(baseUri))
-                .header("Authorization", "Bearer " + token)
-                .body(body)
-                .when()
-                .post(uriPath)
-                .then();
-
-        // Если получили 401 - обновляем токен и повторяем запрос
-        try {
-            response.statusCode(401);
-            // 401 означает невалидный токен
-            refreshToken();
-            token = getAuthToken();
-
-            return given()
-                    .spec(RequestSpec.json(baseUri))
-                    .header("Authorization", "Bearer " + token)
-                    .body(body)
-                    .when()
-                    .post(uriPath)
-                    .then();
-        } catch (AssertionError e) {
-            // Если не 401 - просто возвращаем результат
+        ValidatableResponse response = postWithAuth(baseUri, uriPath, body);
+        if (response.extract().statusCode() != 401) {
             return response;
         }
+        refreshToken();
+        return postWithAuth(baseUri, uriPath, body);
     }
+
+    // ---------- Базовые запросы ----------
 
     public ValidatableResponse get(String baseUri, String uriPath) {
         return given().spec(RequestSpec.json(baseUri))
@@ -156,9 +143,9 @@ public class ApiClient {
                 .then();
     }
 
-    public ValidatableResponse get(String baseUri, String uriPath, Header headers) {
+    public ValidatableResponse get(String baseUri, String uriPath, Header header) {
         return given().spec(RequestSpec.json(baseUri))
-                .header(headers)
+                .header(header)
                 .when().get(uriPath)
                 .then();
     }
@@ -170,10 +157,10 @@ public class ApiClient {
                 .then();
     }
 
-    public ValidatableResponse post(String baseUri, String uriPath, Object body, Header headers) {
+    public ValidatableResponse post(String baseUri, String uriPath, Object body, Header header) {
         return given().spec(RequestSpec.json(baseUri))
                 .body(body)
-                .header(headers)
+                .header(header)
                 .when().post(uriPath)
                 .then();
     }

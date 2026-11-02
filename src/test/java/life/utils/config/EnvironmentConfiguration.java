@@ -5,6 +5,7 @@ import org.aeonbits.owner.Config;
 @Config.LoadPolicy(Config.LoadType.MERGE)
 @Config.Sources({
         "system:properties",
+        "system:env",                 // переменные окружения: CABINET_UIN, CABINET_PASSWORD
         "classpath:${env}.properties",
         "classpath:test.properties"
 })
@@ -52,4 +53,9 @@ public interface EnvironmentConfiguration extends Config {
 
     String password();
 
+    @Key("CABINET_UIN")
+    String cabinetUin();
+
+    @Key("CABINET_PASSWORD")
+    String cabinetPassword();
 }
