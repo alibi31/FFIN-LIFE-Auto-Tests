@@ -1,0 +1,10 @@
+services:
+  gov-mocks:
+    image: wiremock/wiremock:3.9.1
+    container_name: gov-mocks
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./mappings:/home/wiremock/mappings
+      - ./__files:/home/wiremock/__files
+    command: ["--global-response-templating", "--verbose"]

@@ -1,0 +1,27 @@
+# Локальный и CI-контур SaqtaPro для автотестов: приложение + WireMock вместо БМГ / eGov / комплаенса.
+# Запуск: docker compose -f infra/saqtapro/docker-compose.yml up -d
+# Затем: ./gradlew test -Ptags="saqtapro-api" -Dsaqtapro.api.url=http://localhost:8080
+services:
+  wiremock:
+    image: wiremock/wiremock:3.9.1
+    command: ["--port", "8080", "--disable-banner", "--max-request-journal-entries", "20000"]
+    ports:
+      - "8089:8080"   # admin API для тестов: http://localhost:8089/__admin
+
+  saqtapro:
+    image: ${SAQTAPRO_IMAGE:?укажите образ SaqtaPro из реестра}
+    environment:
+      SPRING_PROFILES_ACTIVE: autotest
+      # Все внешние контуры смотрят в WireMock; реальные адреса в этом окружении не заданы вообще
+      BMG_BASE_URL: http://wiremock:8080/bmg
+      EGOV_BASE_URL: http://wiremock:8080/egov
+      COMPLIANCE_BASE_URL: http://wiremock:8080/compliance
+      GOV_CLIENT_TIMEOUT_MS: "5000"
+    depends_on:
+      - wiremock
+    ports:
+      - "8080:8080"
+    networks: [default]
+
+# На k8s-стенде то же самое: WireMock — отдельный Deployment в namespace автотестов,
+# а NetworkPolicy запрещает egress из namespace в интернет — реальный гос. сервис недостижим физически.

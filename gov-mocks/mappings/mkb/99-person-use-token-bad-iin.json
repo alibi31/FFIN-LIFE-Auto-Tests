@@ -1,0 +1,17 @@
+{
+  "name": "MKB person-use-token: ИИН пустой / не 12 цифр / буквы / нет поля -> 400",
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "url": "/api/v1/soap/mkb/person-use-token",
+    "headers": { "x-api-key": { "matches": ".+" } }
+  },
+  "response": {
+    "status": 400,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "jsonBody": {
+      "success": false,
+      "error": "params.iin обязателен (12 цифр)"
+    }
+  }
+}

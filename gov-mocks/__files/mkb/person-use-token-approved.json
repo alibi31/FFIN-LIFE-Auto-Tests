@@ -1,0 +1,165 @@
+{{#assign 'iin'}}{{jsonPath request.body '$.params.iin'}}{{/assign}}{{#assign 'c'}}{{substring iin 6 7}}{{/assign}}{{#assign 'century'}}{{#or (eq c '1') (eq c '2')}}18{{else}}{{#or (eq c '3') (eq c '4')}}19{{else}}20{{/or}}{{/or}}{{/assign}}{{#assign 'birthDate'}}{{century}}{{substring iin 0 2}}-{{substring iin 2 4}}-{{substring iin 4 6}}{{/assign}}{{#assign 'male'}}{{#or (eq c '1') (eq c '3') (eq c '5')}}true{{else}}false{{/or}}{{/assign}}{{#assign 'msgId'}}{{randomValue type='UUID'}}{{/assign}}{{#assign 'corrId'}}{{randomValue length=40 type='ALPHANUMERIC'}}{{/assign}}{{#assign 'sid'}}{{randomValue type='UUID'}}{{/assign}}{{#assign 'docNumber'}}0{{randomValue length=8 type='NUMERIC'}}{{/assign}}
+{
+    "success": true,
+    "server": "https://scbws.mkb.kz/gbdServices/PersonDetailsUseTokenImplService",
+    "action": "getPersonUseToken",
+    "is_test": {{jsonPath request.body '$.is_test'}},
+    "data": {
+        "responseInfo": {
+            "messageId": "{{msgId}}",
+            "correlationId": "{{corrId}}",
+            "responseDate": "{{now timezone='GMT+05:00' format="yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX"}}",
+            "status": {
+                "code": "SCSS001",
+                "message": "Message has been processed successfully"
+            },
+            "sessionId": "{ {{~sid~}} }"
+        },
+        "messageId": "{{msgId}}",
+        "responseDate": "{{now timezone='GMT+05:00' format="yyyy-MM-dd'T'HH:mm:ss.SSSXXX"}}",
+        "correlationId": "{{corrId}}",
+        "processingStatus": {
+            "code": "00000",
+            "nameRu": "Сообщение успешно обработано",
+            "nameKz": "Хабарлама сәтті өңделді",
+            "changeDate": null
+        },
+        "person": {
+            "iin": "{{iin}}",
+            "surname": "{{#eq male 'true'}}ТЕСТОВ{{else}}ТЕСТОВА{{/eq}}",
+            "name": "{{#eq male 'true'}}ТЕСТ{{else}}ТЕСТА{{/eq}}",
+            "patronymic": "{{#eq male 'true'}}ТЕСТОВИЧ{{else}}ТЕСТОВНА{{/eq}}",
+            "engFirstName": "{{#eq male 'true'}}TEST{{else}}TESTA{{/eq}}",
+            "engSurname": "{{#eq male 'true'}}TESTOV{{else}}TESTOVA{{/eq}}",
+            "birthDate": "{{birthDate}}",
+            "gender": {
+                "code": "{{#eq male 'true'}}1{{else}}2{{/eq}}",
+                "nameRu": "{{#eq male 'true'}}Мужской{{else}}Женский{{/eq}}",
+                "nameKz": "{{#eq male 'true'}}Ер{{else}}Әйел{{/eq}}",
+                "changeDate": "2008-03-01T13:21:45+05:00"
+            },
+            "nationality": {
+                "code": "005",
+                "nameRu": "КАЗАХ",
+                "nameKz": "ҚАЗАҚ",
+                "changeDate": "2008-03-01T13:21:45+05:00"
+            },
+            "citizenship": {
+                "code": "398",
+                "nameRu": "КАЗАХСТАН",
+                "nameKz": "ҚАЗАҚСТАН",
+                "changeDate": "2025-06-08T02:11:25+05:00"
+            },
+            "lifeStatus": {
+                "code": "0",
+                "nameRu": "Нормальный",
+                "nameKz": "Қалыпты",
+                "changeDate": "2008-03-01T13:21:45+05:00"
+            },
+            "birthPlace": {
+                "country": {
+                    "code": "398",
+                    "nameRu": "КАЗАХСТАН",
+                    "nameKz": "ҚАЗАҚСТАН",
+                    "changeDate": "2025-06-08T02:11:25+05:00"
+                },
+                "district": {
+                    "code": "1910",
+                    "nameRu": "АЛМАТЫ",
+                    "nameKz": "АЛМАТЫ",
+                    "changeDate": "2008-03-01T13:21:45+05:00"
+                },
+                "region": {
+                    "code": "1910262",
+                    "nameRu": "АУЭЗОВСКИЙ",
+                    "nameKz": "ӘУЕЗОВ",
+                    "changeDate": "2008-03-01T13:21:45+05:00"
+                },
+                "city": "-"
+            },
+            "regAddress": {
+                "country": {
+                    "code": "398",
+                    "nameRu": "КАЗАХСТАН",
+                    "nameKz": "ҚАЗАҚСТАН",
+                    "changeDate": "2025-06-08T02:11:25+05:00"
+                },
+                "district": {
+                    "code": "1910",
+                    "nameRu": "АЛМАТЫ",
+                    "nameKz": "АЛМАТЫ",
+                    "changeDate": "2008-03-01T13:21:45+05:00"
+                },
+                "region": {
+                    "code": "1910264",
+                    "nameRu": "БОСТАНДЫКСКИЙ",
+                    "nameKz": "БОСТАНДЫҚ",
+                    "changeDate": "2008-03-01T13:21:45+05:00"
+                },
+                "street": "УЛИЦА ТЕСТОВАЯ",
+                "building": "1",
+                "flat": "1",
+                "beginDate": "2010-06-15",
+                "status": {
+                    "code": "1",
+                    "nameRu": "Зарегистрирован",
+                    "nameKz": "Тіркелді",
+                    "changeDate": "2013-11-29T22:36:46+05:00"
+                },
+                "invalidity": {
+                    "code": "0",
+                    "nameRu": "Зарегистрирован",
+                    "nameKz": "Тіркелді",
+                    "changeDate": "2013-11-29T22:36:46+05:00"
+                },
+                "arCode": "{{randomValue length=16 type='NUMERIC'}}"
+            },
+            "documents": {
+                "document": [
+                    {
+                        "type": {
+                            "code": "002",
+                            "nameRu": "УДОСТОВЕРЕНИЕ РК",
+                            "nameKz": "ҚР ЖЕКЕ КУӘЛІГІ",
+                            "changeDate": "2008-03-01T13:21:45+05:00"
+                        },
+                        "number": "{{docNumber}}",
+                        "beginDate": "{{now offset='-2 years' format='yyyy-MM-dd'}}",
+                        "endDate": "{{now offset='8 years' format='yyyy-MM-dd'}}",
+                        "issueOrganization": {
+                            "code": "002",
+                            "nameRu": "МИНИСТЕРСТВО ВНУТРЕННИХ ДЕЛ РК",
+                            "nameKz": "ҚР ІШКІ ІСТЕР МИНИСТРЛІГІ",
+                            "changeDate": "2008-03-01T13:21:45+05:00"
+                        },
+                        "status": {
+                            "code": "00",
+                            "nameRu": "ДОКУМЕНТ ДЕЙСТВИТЕЛЕН",
+                            "nameKz": "ҚҰЖАТ ЖАРАМДЫ",
+                            "changeDate": "2008-03-01T13:21:45+05:00"
+                        },
+                        "surname": "{{#eq male 'true'}}ТЕСТОВ{{else}}ТЕСТОВА{{/eq}}",
+                        "name": "{{#eq male 'true'}}ТЕСТ{{else}}ТЕСТА{{/eq}}",
+                        "patronymic": "{{#eq male 'true'}}ТЕСТОВИЧ{{else}}ТЕСТОВНА{{/eq}}",
+                        "birthDate": "{{birthDate}}"
+                    }
+                ]
+            },
+            "addresses": null
+        },
+        "dataSources": [
+            {
+                "code": "GBDFL",
+                "nameRu": "ГБД \"Физические лица\"",
+                "nameKz": "\"Жеке түлағалар\" МДҚ",
+                "changeDate": null
+            },
+            {
+                "code": "GKB",
+                "nameRu": "АО \"Государственное кредитное бюро\" НБ РК",
+                "nameKz": "ҚР ҰБ \"Мемлекеттік кредиттік бюро\" АҚ",
+                "changeDate": null
+            }
+        ]
+    }
+}

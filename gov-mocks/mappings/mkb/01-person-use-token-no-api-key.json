@@ -1,0 +1,18 @@
+{
+  "name": "MKB person-use-token: нет x-api-key -> 401",
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "url": "/api/v1/soap/mkb/person-use-token",
+    "headers": { "x-api-key": { "absent": true } }
+  },
+  "response": {
+    "status": 401,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "jsonBody": {
+      "success": false,
+      "error": { "detail": "Учетные данные не были предоставлены." },
+      "status_code": 401
+    }
+  }
+}

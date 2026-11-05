@@ -1,0 +1,15 @@
+{
+  "name": "MKB person-use-token: клиент ещё не ответил на SMS. ИИН с порядковым номером 90xx -> 202 PENDING",
+  "priority": 4,
+  "request": {
+    "method": "POST",
+    "url": "/api/v1/soap/mkb/person-use-token",
+    "headers": { "x-api-key": { "matches": ".+" } },
+    "bodyPatterns": [ { "matchesJsonPath": "$.params[?(@.iin =~ /^[0-9]{7}90[0-9]{3}$/)]" } ]
+  },
+  "response": {
+    "status": 202,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "jsonBody": { "success": false, "kdp_status": "PENDING", "error": "SMS отправлено субъекту, ожидайте подтверждения и повторите запрос." }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "MKB person-use-token: клиент ответил 511 (согласие). Любой другой ИИН из 12 цифр -> 200 + данные из ГБДФЛ (дата рождения и пол берутся из ИИН)",
+  "priority": 5,
+  "request": {
+    "method": "POST",
+    "url": "/api/v1/soap/mkb/person-use-token",
+    "headers": { "x-api-key": { "matches": ".+" } },
+    "bodyPatterns": [ { "matchesJsonPath": "$.params[?(@.iin =~ /^[0-9]{12}$/)]" } ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "bodyFileName": "mkb/person-use-token-approved.json",
+    "transformers": ["response-template"]
+  }
+}
