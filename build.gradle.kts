@@ -120,9 +120,19 @@ tasks.withType<Test>().configureEach {
         // Обратная совместимость с CI: -PincludeTags=ffin-api,PA-UI / -PexcludeTags=...
         csvProperty("includeTags").takeIf { it.isNotEmpty() }?.let { includeTags(*it.toTypedArray()) }
         csvProperty("excludeTags").takeIf { it.isNotEmpty() }?.let { excludeTags(*it.toTypedArray()) }
-    }
+    } // ← здесь заканчиваются настройки JUnit
 
     ignoreFailures = false
+
+    // Автотесты ходят в живые системы: результат зависит не только от кода,
+    // поэтому всегда запускаем заново (иначе Gradle пропустит задачу как UP-TO-DATE)
+    outputs.upToDateWhen { false }
+
+    // Чистим результаты прошлого прогона, чтобы в отчёте не смешивались запуски
+    val allureResults = layout.buildDirectory.dir("allure-results")
+    doFirst {
+        allureResults.get().asFile.deleteRecursively()
+    }
 }
 
 tasks.test {
@@ -136,6 +146,13 @@ tasks.test {
         events("failed", "skipped")
         exceptionFormat = TestExceptionFormat.FULL
         showStackTraces = true
+    }
+}
+
+tasks.named("allureReport") {
+    val reportDir = layout.buildDirectory.dir("reports/allure-report")
+    doFirst {
+        reportDir.get().asFile.deleteRecursively()
     }
 }
 
