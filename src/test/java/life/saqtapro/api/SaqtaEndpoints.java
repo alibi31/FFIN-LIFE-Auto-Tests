@@ -10,6 +10,8 @@ public final class SaqtaEndpoints {
 
     /** Реальный эндпоинт SaqtaPro (dev-lins-refactor) */
     public static final String LOGIN = "/api/login";
+    /** Профиль текущего сотрудника по Bearer-токену */
+    public static final String ME = "/api/me";
 
     // Клиенты и комплаенс
     public static final String CLIENTS = "/api/v1/clients";

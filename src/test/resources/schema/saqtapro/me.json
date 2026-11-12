@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SaqtaPro: успешный ответ GET /api/me",
+  "type": "object",
+  "required": [
+    "status",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "enum": [
+        true
+      ]
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "email",
+        "department",
+        "department_slug",
+        "position",
+        "branch",
+        "can_access_admin",
+        "permissions"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "promo_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "minLength": 3
+        },
+        "department": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "department_slug": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "position": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch": {
+          "type": "object",
+          "required": [
+            "id",
+            "name_ru",
+            "name_kz"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name_ru": {
+              "type": "string"
+            },
+            "name_kz": {
+              "type": "string"
+            },
+            "aka_names": {
+              "type": [
+                "string",
+                "array",
+                "null"
+              ]
+            },
+            "lic_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "can_access_admin": {
+          "type": "boolean"
+        },
+        "permissions": {
+          "type": "array"
+        },
+        "osrns_underwriting_responsibilities": {
+          "type": "array"
+        },
+        "notifications": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

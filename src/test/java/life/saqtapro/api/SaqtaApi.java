@@ -36,8 +36,20 @@ public final class SaqtaApi {
         return new SaqtaApi("raw-token", () -> base().auth().oauth2(token));
     }
 
+    /**
+     * С произвольным значением заголовка Authorization как есть — для проверок
+     * пустого "Bearer ", токена без префикса "Bearer" и т.п.
+     */
+    public static SaqtaApi withAuthorizationHeader(String headerValue) {
+        return new SaqtaApi("raw-header", () -> base().header("Authorization", headerValue));
+    }
+
     private static RequestSpecification base() {
         return io.restassured.RestAssured.given().spec(RequestSpec.json(Saqta.cfg().apiUrl()));
+    }
+
+    public ProfileApi profile() {
+        return new ProfileApi(spec);
     }
 
     public ClientApi clients() {

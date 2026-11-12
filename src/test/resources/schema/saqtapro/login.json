@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["status", "data"],
   "properties": {
-    "status": { "const": true },
+    "status": { "enum": [true] },
     "data": {
       "type": "object",
       "required": [
