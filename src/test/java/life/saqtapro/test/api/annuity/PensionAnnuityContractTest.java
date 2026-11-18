@@ -14,8 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Map;
 
 import static io.restassured.http.ContentType.JSON;
@@ -47,13 +45,15 @@ class PensionAnnuityContractTest {
 
     @Test
     @DisplayName("POST /api/v2/contracts/pension-annuity/contract — регистрация договора с электронным подписанием")
-    @Description("Договор создаётся по готовому расчёту, ответ соответствует JSON-схеме, данные застрахованного, "
+    @Description("Договор создаётся по свежему расчёту (POST .../calculations), ответ соответствует JSON-схеме, данные застрахованного, "
             + "расчёта и реквизиты попадают в договор; GET по id возвращает тот же договор")
     void registerContract() {
-        PensionAnnuityContractRequest request = PensionAnnuityFixtures.electronicContract();
-        int calculationId = request.calculationId().intValue();
+        // calculation_id одноразовый — на каждый прогон свой расчёт
+        long freshCalculationId = api.newCalculationId(PensionAnnuityFixtures.successfulCalculation());
+        PensionAnnuityContractRequest request = PensionAnnuityFixtures.electronicContract(freshCalculationId);
+        int calculationId = Math.toIntExact(freshCalculationId);
         // Дата заключения считается по времени Алматы: прогон около полуночи UTC не должен падать
-        String today = LocalDate.now(ZoneId.of("Asia/Almaty")).toString();
+        String today = PensionAnnuityFixtures.today().toString();
 
         JsonPath created = api.createContract(request)
                 .statusCode(200)

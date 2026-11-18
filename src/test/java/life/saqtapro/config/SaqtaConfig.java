@@ -32,13 +32,6 @@ public interface SaqtaConfig extends Config {
     @DefaultValue("30")
     int govVerificationTimeoutSeconds();
 
-    /**
-     * Расчёт пенсионного аннуитета, на который оформляется договор. Временное решение: как только
-     * будет запрос расчёта из SaqtaPro, тест будет создавать свежий расчёт сам.
-     */
-    @Key("saqtapro.annuity.calculation.id")
-    Long annuityCalculationId();
-
     /** Таймаут клиента SaqtaPro к гос. сервисам — нужен для тестов на зависание внешнего контура */
     @Key("saqtapro.gov.client.timeout.ms")
     @DefaultValue("5000")
